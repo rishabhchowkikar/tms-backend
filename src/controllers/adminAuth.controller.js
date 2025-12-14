@@ -51,23 +51,48 @@ exports.signup = async (req, res, next) => {
     }
 }
 
-// Login
+// login
 exports.login = async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const admin = await Admin.findOne({ email }).select('+passwordHash');
-        if (!admin) return res.status(401).json({ message: "Invalid email or password", success: false })
+        const { identifier, password } = req.body;
 
-        const isMatch = await admin.comparePassword(password);
-        if (!isMatch) return res.status(401).json({ message: "Invalid email or password", success: false })
+        if (!identifier || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email/adminname and password are required"
+            })
+        }
+
+        // find admin by email or adminname
+        const admin = await Admin.findOne({
+            $or: [
+                { email: identifier.toLowerCase() },
+                { adminname: identifier }
+            ]
+        }).select('+passwordHash');
+
+        if (!admin) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid Credentails"
+            })
+        }
+
+        const match = await admin.comparePassword(password);
+        if (!match) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid Credentials"
+            });
+        }
 
         const token = generateToken(admin);
 
-        return res.status(200).json({
-            message: "Login successful",
+        res.status(200).json({
             success: true,
-            payload: {
-                token: token,
+            message: "Login Successfully",
+            data: {
+                token,
                 admin: {
                     id: admin._id,
                     adminname: admin.adminname,
@@ -79,11 +104,12 @@ exports.login = async (req, res) => {
         })
 
     } catch (error) {
-        return res.status(500).json({
+        console.error('Login error:', error);
+        res.status(500).json({
             success: false,
-            message: 'Internal Server Error',
+            message: 'Server error during login',
             error: error.message
-        })
+        });
     }
 }
 

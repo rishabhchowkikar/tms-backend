@@ -4,6 +4,7 @@ const cors = require('cors');
 const { connectDB } = require('./src/utils/db.js');
 const adminAuthRoutes = require('./src/routes/adminAuth.routes.js');
 const superAdminControllerRoutes = require('./src/routes/superAdmin.routes.js');
+const depotAdminControllerRoutes = require('./src/routes/depotAdmin.routes.js')
 dotenv.config();
 const app = express();
 
@@ -19,6 +20,7 @@ connectDB();
 // routes
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/admin/superadmin', superAdminControllerRoutes)
+app.use('/api/admin/depot-work-space', depotAdminControllerRoutes)
 // health check
 app.get('/api/health', (req, res) => {
     res.status(200).json({

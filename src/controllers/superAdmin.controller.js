@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Admin = require('../models/admin.models.js');
 const Depot = require('../models/depot.models.js');
+const Staff = require('../models/staff.model.js')
 
 exports.createDepotAdmin = async (req, res) => {
     try {
@@ -132,3 +133,56 @@ exports.getAllDepotAdmins = async (req, res) => {
         });
     }
 };
+
+exports.getAllStaff = async (req, res) => {
+    try {
+        const staff = await Staff.find({})
+            .select('-__v')
+            .populate({
+                path: "depotId",
+                select: "name code type district",
+                populate: {
+                    path: 'parentDepot',
+                    select: "name code"
+                }
+            })
+            .sort({ createdAt: -1 })
+
+        const formattedStaff = staff.map(s => ({
+            id: s._id,
+            name: s.name,
+            code: s.code,
+            role: s.role,
+            phone: s.phone,
+            licenseNumber: s.licenseNumber,
+            isActive: s.isActive,
+            createdAt: s.createdAt,
+            depot: s.depotId ? {
+                id: s.depotId._id,
+                name: s.depotId.name,
+                code: s.depotId.code,
+                type: s.depotId.type,
+                district: s.depotId.district,
+                parentDepot: s.depotId.parentDepot ? {
+                    id: s.depotId.parentDepot._id,
+                    name: s.depotId.parentDepot.name,
+                    code: s.depotId.parentDepot.code
+                } : null
+            } : null
+        }));
+
+        res.json({
+            success: true,
+            message: 'All staff fetched successfully',
+            count: formattedStaff.length,
+            data: formattedStaff
+        });
+    } catch (error) {
+        console.error('Get All Staff Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server error',
+            error: error.message
+        });
+    }
+}
