@@ -4,6 +4,12 @@ const Admin = require('../models/admin.models.js')
 const protect = async (req, res, next) => {
 
     let token;
+
+    // checking token from cookie
+    if (req.cookies && req.cookies["authtms-token"]) {
+        token = req.cookies["authtms-token"]
+    }
+
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     }

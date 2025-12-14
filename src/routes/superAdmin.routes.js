@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/create-admin-by-superadmin', protect, superAdminOnly, createDepotAdmin);
 router.get('/get-all-admin', protect, superAdminOnly, getAllDepotAdmins);
-router.get('/get-all-staff', protect, getAllStaff)
+router.get('/get-all-staff', protect, superAdminOnly, getAllStaff)
 
 
 module.exports = router;

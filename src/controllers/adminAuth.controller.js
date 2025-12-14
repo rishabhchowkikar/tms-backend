@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Admin = require('../models/admin.models.js')
 const { generateToken } = require('../utils/generateToken.js')
+const setTokenCookie = require('../utils/setTokenCookie.js');
 
 // SIGNUP – Only for first Super Admin (or later by Super Admin)
 exports.signup = async (req, res, next) => {
@@ -87,6 +88,10 @@ exports.login = async (req, res) => {
         }
 
         const token = generateToken(admin);
+        // Inside login after generating token:
+
+        // Set cookie
+        setTokenCookie(res, token);
 
         res.status(200).json({
             success: true,
@@ -115,6 +120,11 @@ exports.login = async (req, res) => {
 
 // LOGOUT – Just client-side (delete token from frontend)
 exports.logout = (req, res) => {
+    res.cookie("authtms-token", '', {
+        httpOnly: true,
+        expires: new Date(0)
+    })
+
     res.status(200).json({
         message: 'Logged out successfully',
         success: true

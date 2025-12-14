@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const cookieParser = require('cookie-parser')
 const { connectDB } = require('./src/utils/db.js');
 const adminAuthRoutes = require('./src/routes/adminAuth.routes.js');
 const superAdminControllerRoutes = require('./src/routes/superAdmin.routes.js');
@@ -10,6 +11,7 @@ const app = express();
 
 // middleware
 app.use(express.json());
+app.use(cookieParser())
 app.use(cors({
     origin: ['http://localhost:3000', 'http://localhost:5173'],
 }));
