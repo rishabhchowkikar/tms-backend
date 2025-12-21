@@ -130,3 +130,30 @@ exports.logout = (req, res) => {
         success: true
     });
 };
+
+// GET CURRENT ADMIN
+exports.getMe = async (req,res) =>{
+    try {
+        const admin = req.admin;
+
+        res.status(200).json({
+            success: true,
+            message: "User authenticated successfully",
+            data:{
+                admin:{
+                    id: admin._id,
+                    adminname: admin.adminname,
+                    email: admin.email,
+                    role: admin.role,
+                    depotId: admin.depotId
+                }
+            }
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+}
