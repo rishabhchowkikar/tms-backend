@@ -1,5 +1,6 @@
 const Staff = require('../models/staff.model.js')
 const Depot = require('../models/depot.models.js')
+const Admin = require('../models/admin.models.js');
 // create or add new driver or conductor
 exports.addStaff = async (req, res) => {
     try {
@@ -94,5 +95,34 @@ exports.getMyStaff = async (req, res) => {
         res.status(200).json({ success: true, count: staff.length, data: staff })
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+exports.getAllDepots = async (req, res) => {
+    try {
+          // Find all depots that are NOT assigned to any admin
+        const assignedDepots = await Admin.find({ role: 'admin' }).select('depotId');
+        const assignedDepotIds = assignedDepots.map(admin => admin.depotId.toString()); // this gives array of assigned depot ids
+        const depots = await Depot.find({_id:{ $nin : assignedDepotIds}}).select('_id name code type district parentDepot').sort({ name: 1 });
+        const formattedDepots = depots.map(depot => ({
+            id: depot._id,
+            name: depot.name,
+            code: depot.code,
+            type: depot.type,
+            district: depot.district,
+            parentDepot: depot.parentDepot
+        }));
+        res.status(200).json({
+            success: true,
+            count: formattedDepots.length,
+            data: formattedDepots
+        });
+    } catch (error) {
+        console.error('Get All Depots Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
     }
 }

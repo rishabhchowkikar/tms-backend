@@ -228,7 +228,81 @@ Tokens are generated on login and expire after 1 day.
 
 ---
 
-### 1.3 POST `/super-admin-logout`
+### 1.3 GET `/me`
+
+**Description:** Retrieves the current authenticated admin user's information. Used to verify authentication status and get user details on app initialization or page refresh. This endpoint is commonly used by frontend applications to check if a user is still authenticated.
+
+**Authentication:** Required (`protect` middleware)
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Request Body:** None
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "User authenticated successfully",
+  "data": {
+    "admin": {
+      "id": "507f1f77bcf86cd799439011",
+      "adminname": "depotadmin1",
+      "email": "admin@depot.com",
+      "role": "admin" | "superadmin",
+      "depotId": "507f1f77bcf86cd799439012" | null
+    }
+  }
+}
+```
+
+**Error Responses:**
+
+- **401 Unauthorized** - No token or invalid token:
+```json
+{
+  "success": false,
+  "message": "Unauthorized" | "Token invalid or expired"
+}
+```
+
+- **401 Unauthorized** - User not found:
+```json
+{
+  "success": false,
+  "message": "User not found"
+}
+```
+
+- **500 Internal Server Error** - Server error:
+```json
+{
+  "success": false,
+  "message": "Server error",
+  "error": "error message details"
+}
+```
+
+**Best Case Scenario:**
+- Valid JWT token provided
+- Token not expired
+- Admin found in database
+- **Time Complexity:** O(1)
+- **Response Time:** ~50-150ms
+
+**Worst Case Scenario:**
+- No token provided → 401 Unauthorized
+- Invalid/expired token → 401 Unauthorized
+- Admin not found in database → 401 Unauthorized
+- Database connection failure → 500 Internal Server Error
+- **Time Complexity:** O(1)
+- **Response Time:** ~100-300ms
+
+---
+
+### 1.4 POST `/super-admin-logout`
 
 **Description:** Logout endpoint for superadmin. This is primarily a client-side operation (token should be removed from client storage). The endpoint confirms successful logout.
 
